@@ -1,7 +1,9 @@
--- [[ GeminiXhub v4.0 - ESTILO VOIDWARE ]]
+-- [[ GeminiXhub v5.0 - VOIDWARE + ESP + INF JUMP ]]
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
 
 _G.Key = "GXM-2026-TOP1"
 
@@ -13,15 +15,14 @@ end
 
 local function CrearMenuVoid()
     local MainGui = Instance.new("ScreenGui")
-    MainGui.Name = "GeminiX_Voidware"
+    MainGui.Name = "GeminiX_Voidware_V5"
     MainGui.Parent = CoreGui
     MainGui.ResetOnSpawn = false
 
-    -- BOTÓN FLOTANTE (ESTILO NEÓN)
     local OpenBtn = Instance.new("TextButton")
     OpenBtn.Size = UDim2.new(0, 45, 0, 45)
     OpenBtn.Position = UDim2.new(0, 15, 0.5, 0)
-    OpenBtn.Text = "V" -- De Voidware
+    OpenBtn.Text = "V"
     OpenBtn.Visible = false
     OpenBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
     OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -29,16 +30,13 @@ local function CrearMenuVoid()
     OpenBtn.Parent = MainGui
     EstiloVoid(OpenBtn)
 
-    -- PANEL PRINCIPAL VOIDWARE
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 240, 0, 300)
-    Frame.Position = UDim2.new(0.5, -120, 0.5, -150)
-    Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15) -- Fondo oscuro
-    Frame.BorderSizePixel = 0
+    Frame.Size = UDim2.new(0, 240, 0, 380) -- Más alto para las nuevas opciones
+    Frame.Position = UDim2.new(0.5, -120, 0.5, -190)
+    Frame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     Frame.Parent = MainGui
     EstiloVoid(Frame)
     
-    -- Borde Neón (Efecto Void)
     local Stroke = Instance.new("UIStroke")
     Stroke.Color = Color3.fromRGB(0, 170, 255)
     Stroke.Thickness = 2
@@ -46,44 +44,74 @@ local function CrearMenuVoid()
 
     local Title = Instance.new("TextLabel")
     Title.Size = UDim2.new(1, 0, 0, 45)
-    Title.Text = "VOIDWARE | GEMINIX"
+    Title.Text = "VOIDWARE | V5"
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.BackgroundTransparency = 1
     Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 18
     Title.Parent = Frame
 
-    -- BOTONES TIPO VOIDWARE
     local function CrearBoton(texto, pos, func)
         local Btn = Instance.new("TextButton")
-        Btn.Size = UDim2.new(0, 210, 0, 40)
+        Btn.Size = UDim2.new(0, 210, 0, 35)
         Btn.Position = pos
         Btn.Text = texto
-        Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        Btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
         Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
         Btn.Font = Enum.Font.Gotham
         Btn.Parent = Frame
         EstiloVoid(Btn)
-        
         Btn.MouseButton1Click:Connect(func)
     end
 
-    CrearBoton("VELOCIDAD FLASH", UDim2.new(0.5, -105, 0, 60), function()
+    -- BOTONES EXISTENTES
+    CrearBoton("VELOCIDAD FLASH", UDim2.new(0.5, -105, 0, 50), function()
         LocalPlayer.Character.Humanoid.WalkSpeed = 100
     end)
 
-    CrearBoton("SUPER SALTO", UDim2.new(0.5, -105, 0, 110), function()
+    CrearBoton("SUPER SALTO", UDim2.new(0.5, -105, 0, 95), function()
         LocalPlayer.Character.Humanoid.UseJumpPower = true
         LocalPlayer.Character.Humanoid.JumpPower = 150
     end)
-    
-    CrearBoton("RESET CHARACTER", UDim2.new(0.5, -105, 0, 160), function()
+
+    -- NUEVO: ESP (VER GENTE)
+    CrearBoton("ACTIVAR ESP (VER GENTE)", UDim2.new(0.5, -105, 0, 140), function()
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                local Highlight = Instance.new("Highlight")
+                Highlight.Parent = v.Character
+                Highlight.FillColor = Color3.fromRGB(0, 170, 255)
+                Highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+            end
+        end
+    end)
+
+    -- NUEVO: SALTO INFINITO
+    local InfJumpEnabled = false
+    CrearBoton("SALTO INFINITO", UDim2.new(0.5, -105, 0, 185), function()
+        InfJumpEnabled = not InfJumpEnabled
+        local b = Frame:FindFirstChild("InfJumpStatus") or Instance.new("TextLabel")
+        b.Name = "InfJumpStatus"
+        b.Size = UDim2.new(0, 210, 0, 20)
+        b.Position = UDim2.new(0.5, -105, 0, 225)
+        b.BackgroundTransparency = 1
+        b.TextColor3 = InfJumpEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+        b.Text = InfJumpEnabled and "INFINITE JUMP: ACTIVADO" or "INFINITE JUMP: DESACTIVADO"
+        b.Parent = Frame
+    end)
+
+    UserInputService.JumpRequest:Connect(function()
+        if InfJumpEnabled then
+            LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        end
+    end)
+
+    CrearBoton("RESET CHARACTER", UDim2.new(0.5, -105, 0, 260), function()
         LocalPlayer.Character:BreakJoints()
     end)
 
     local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Size = UDim2.new(0, 210, 0, 40)
-    CloseBtn.Position = UDim2.new(0.5, -105, 0, 240)
+    CloseBtn.Size = UDim2.new(0, 210, 0, 35)
+    CloseBtn.Position = UDim2.new(0.5, -105, 0, 320)
     CloseBtn.Text = "MINIMIZAR"
     CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 10, 10)
     CloseBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
@@ -101,7 +129,7 @@ local function CrearMenuVoid()
     end)
 end
 
--- SISTEMA DE KEY (ESTILO VOID)
+-- SISTEMA DE KEY (MISMO DE ANTES)
 local function StartKeySystem()
     local KeyGui = Instance.new("ScreenGui")
     KeyGui.Parent = CoreGui
@@ -111,10 +139,7 @@ local function StartKeySystem()
     Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     Main.Parent = KeyGui
     EstiloVoid(Main)
-    
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(0, 170, 255)
-    Stroke.Parent = Main
+    Instance.new("UIStroke", Main).Color = Color3.fromRGB(0, 170, 255)
 
     local GetKey = Instance.new("TextButton")
     GetKey.Size = UDim2.new(0, 280, 0, 35)
@@ -145,7 +170,6 @@ local function StartKeySystem()
     Enter.Position = UDim2.new(0.5, -140, 0, 135)
     Enter.Text = "AUTENTICAR"
     Enter.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-    Enter.TextColor3 = Color3.fromRGB(255, 255, 255)
     Enter.Parent = Main
     EstiloVoid(Enter)
     
