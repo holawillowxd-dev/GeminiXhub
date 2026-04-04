@@ -1,14 +1,13 @@
--- [[ GeminiXhub v12.5 - OFFICIAL GITHUB RELEASE ]]
+-- [[ GeminiXhub v12.6 - FULL FINAL EDITION ]]
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
-local Mouse = LocalPlayer:GetMouse()
 
 _G.Key = "GXM-2026-TOP1"
-local States = { Speed=16, Jump=50, ESP=false, InfJump=false, Noclip=false, Fly=false, Spin=false, AutoClick=false }
+local States = { Speed=16, Jump=50, ESP=false, InfJump=false, Noclip=false, Fly=false }
 
 local function EstiloVoid(instancia, radio)
     local Corner = Instance.new("UICorner")
@@ -16,14 +15,12 @@ local function EstiloVoid(instancia, radio)
     Corner.Parent = instancia
 end
 
--- ==========================================
--- FUNCIÓN DEL MENÚ PRINCIPAL (EL HUB)
--- ==========================================
 local function CrearMenuTabs()
     if CoreGui:FindFirstChild("GeminiX_Ultimate") then CoreGui.GeminiX_Ultimate:Destroy() end
     local MainGui = Instance.new("ScreenGui", CoreGui)
     MainGui.Name = "GeminiX_Ultimate"
 
+    -- Botón para reabrir el menú (Flotante)
     local OpenBtn = Instance.new("TextButton", MainGui)
     OpenBtn.Size = UDim2.new(0, 50, 0, 50)
     OpenBtn.Position = UDim2.new(0, 10, 0.5, 0)
@@ -40,6 +37,25 @@ local function CrearMenuTabs()
     MainFrame.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
     EstiloVoid(MainFrame, 12)
     Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(0, 170, 255)
+
+    -- BOTÓN MINIMIZAR (LA X ARRIBA A LA DERECHA)
+    local Close = Instance.new("TextButton", MainFrame)
+    Close.Size = UDim2.new(0, 30, 0, 30)
+    Close.Position = UDim2.new(1, -35, 0, 5)
+    Close.Text = "X"
+    Close.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    Close.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Close.Font = Enum.Font.GothamBold
+    EstiloVoid(Close, 6)
+    
+    Close.MouseButton1Click:Connect(function()
+        MainFrame.Visible = false
+        OpenBtn.Visible = true
+    end)
+    OpenBtn.MouseButton1Click:Connect(function()
+        MainFrame.Visible = true
+        OpenBtn.Visible = false
+    end)
 
     local Sidebar = Instance.new("Frame", MainFrame)
     Sidebar.Size = UDim2.new(0, 130, 1, 0)
@@ -58,8 +74,8 @@ local function CrearMenuTabs()
         P.Size = UDim2.new(1, 0, 1, 0)
         P.BackgroundTransparency = 1
         P.Visible = false
-        P.CanvasSize = UDim2.new(0, 0, 4, 0)
-        P.ScrollBarThickness = 2
+        P.CanvasSize = UDim2.new(0, 0, 3, 0)
+        P.ScrollBarThickness = 0
         TabPages[nombre] = P
         return P
     end
@@ -82,14 +98,13 @@ local function CrearMenuTabs()
         B.Text = txt
         B.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
         B.TextColor3 = Color3.fromRGB(255, 255, 255)
-        B.Font = Enum.Font.Gotham
         EstiloVoid(B, 5)
         B.MouseButton1Click:Connect(function() MostrarPagina(target) end)
     end
 
     BotonTab("General", 50, "Main")
-    BotonTab("Not Visual", 90, "NotVis")
-    BotonTab("World & Mix", 130, "World")
+    BotonTab("Hacks", 90, "NotVis")
+    BotonTab("World", 130, "World")
     BotonTab("Visuals", 170, "Visuals")
 
     local function Toggle(txt, pag, y, callback)
@@ -99,7 +114,6 @@ local function CrearMenuTabs()
         T.Text = txt .. ": OFF"
         T.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         T.TextColor3 = Color3.fromRGB(200, 200, 200)
-        T.Font = Enum.Font.Gotham
         EstiloVoid(T, 5)
         local act = false
         T.MouseButton1Click:Connect(function()
@@ -110,44 +124,22 @@ local function CrearMenuTabs()
         end)
     end
 
-    -- --- CONTENIDO DEL HUB ---
-    Toggle("Reset Character", P_Main, 0, function() LocalPlayer.Character:BreakJoints() end)
-    Toggle("FPS Boost", P_Main, 40, function(s) if s then for _,v in pairs(game:GetDescendants()) do if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end end end end)
-    Toggle("FOV 120", P_Main, 80, function(s) workspace.CurrentCamera.FieldOfView = s and 120 or 70 end)
+    -- CONTENIDO
+    Toggle("Reset Char", P_Main, 0, function() LocalPlayer.Character:BreakJoints() end)
     Toggle("Speed 100", P_NotVis, 0, function(s) LocalPlayer.Character.Humanoid.WalkSpeed = s and 100 or 16 end)
-    Toggle("Jump 150", P_NotVis, 40, function(s) LocalPlayer.Character.Humanoid.JumpPower = s and 150 or 50 end)
-    Toggle("Inf Jump", P_NotVis, 80, function(s) States.InfJump = s end)
-    Toggle("Fly (BETA)", P_NotVis, 120, function(s) States.Fly = s end)
-    Toggle("Noclip", P_NotVis, 160, function(s) States.Noclip = s end)
+    Toggle("Jump 150", P_NotVis, 45, function(s) LocalPlayer.Character.Humanoid.JumpPower = s and 150 or 50 end)
+    Toggle("Inf Jump", P_NotVis, 90, function(s) States.InfJump = s end)
     Toggle("Low Gravity", P_World, 0, function(s) workspace.Gravity = s and 50 or 196.2 end)
     Toggle("ESP Wallhack", P_Visuals, 0, function(s)
         States.ESP = s
         if s then for _, v in pairs(Players:GetPlayers()) do if v ~= LocalPlayer and v.Character then local h = Instance.new("Highlight", v.Character) h.Name = "GeminiESP" h.FillColor = Color3.fromRGB(0, 170, 255) end end
         else for _, v in pairs(Players:GetPlayers()) do if v.Character and v.Character:FindFirstChild("GeminiESP") then v.Character.GeminiESP:Destroy() end end end
     end)
-
-    -- LOOPS DE FUNCIONAMIENTO
-    RunService.Stepped:Connect(function()
-        if States.Noclip and LocalPlayer.Character then for _,v in pairs(LocalPlayer.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end end
-    end)
-
-    local Close = Instance.new("TextButton", Sidebar)
-    Close.Size = UDim2.new(0.9, 0, 0, 30)
-    Close.Position = UDim2.new(0.05, 0, 1, -40)
-    Close.Text = "Minimizar"
-    Close.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    EstiloVoid(Close, 6)
-    Close.MouseButton1Click:Connect(function() MainFrame.Visible = false OpenBtn.Visible = true end)
-    OpenBtn.MouseButton1Click:Connect(function() MainFrame.Visible = true OpenBtn.Visible = false end)
 end
 
--- ==========================================
--- SISTEMA DE KEY CON GET KEY (AUTO-COPIAR)
--- ==========================================
+-- SISTEMA DE KEY
 local function StartKeySystem()
     local KeyGui = Instance.new("ScreenGui", CoreGui)
-    KeyGui.Name = "GeminiX_KeySystem"
-
     local Main = Instance.new("Frame", KeyGui)
     Main.Size = UDim2.new(0, 320, 0, 200)
     Main.Position = UDim2.new(0.5, -160, 0.5, -100)
@@ -155,58 +147,34 @@ local function StartKeySystem()
     EstiloVoid(Main, 12)
     Instance.new("UIStroke", Main).Color = Color3.fromRGB(0, 170, 255)
 
-    local Title = Instance.new("TextLabel", Main)
-    Title.Size = UDim2.new(1, 0, 0, 40)
-    Title.Text = "GEMINIX KEY SYSTEM"
-    Title.TextColor3 = Color3.fromRGB(0, 170, 255)
-    Title.Font = Enum.Font.GothamBold
-    Title.BackgroundTransparency = 1
+    local GetKey = Instance.new("TextButton", Main)
+    GetKey.Size = UDim2.new(0.8, 0, 0, 40)
+    GetKey.Position = UDim2.new(0.1, 0, 0.2, 0)
+    GetKey.Text = "COPY KEY 🔑"
+    GetKey.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    GetKey.TextColor3 = Color3.fromRGB(255, 255, 255)
+    EstiloVoid(GetKey, 8)
+    GetKey.MouseButton1Click:Connect(function()
+        setclipboard(_G.Key)
+        GetKey.Text = "COPIED! ✅"
+    end)
 
     local Input = Instance.new("TextBox", Main)
-    Input.Size = UDim2.new(0.85, 0, 0, 40)
-    Input.Position = UDim2.new(0.075, 0, 0.25, 0)
-    Input.PlaceholderText = "Paste Key here..."
+    Input.Size = UDim2.new(0.8, 0, 0, 40)
+    Input.Position = UDim2.new(0.1, 0, 0.45, 0)
+    Input.PlaceholderText = "Paste key here..."
     Input.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Input.TextColor3 = Color3.fromRGB(255, 255, 255)
     EstiloVoid(Input, 8)
 
-    local GetKey = Instance.new("TextButton", Main)
-    GetKey.Size = UDim2.new(0.4, 0, 0, 35)
-    GetKey.Position = UDim2.new(0.075, 0, 0.55, 0)
-    GetKey.Text = "GET KEY 🔑"
-    GetKey.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    GetKey.TextColor3 = Color3.fromRGB(255, 255, 255)
-    EstiloVoid(GetKey, 8)
-
     local Login = Instance.new("TextButton", Main)
-    Login.Size = UDim2.new(0.4, 0, 0, 35)
-    Login.Position = UDim2.new(0.525, 0, 0.55, 0)
+    Login.Size = UDim2.new(0.8, 0, 0, 40)
+    Login.Position = UDim2.new(0.1, 0, 0.7, 0)
     Login.Text = "LOGIN 🚀"
     Login.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-    Login.TextColor3 = Color3.fromRGB(255, 255, 255)
     EstiloVoid(Login, 8)
-
-    GetKey.MouseButton1Click:Connect(function()
-        if setclipboard then
-            setclipboard(_G.Key)
-            GetKey.Text = "COPIED! ✅"
-            task.wait(2)
-            GetKey.Text = "GET KEY 🔑"
-        else
-            GetKey.Text = "No Clipboard Support"
-        end
-    end)
-
     Login.MouseButton1Click:Connect(function()
-        if Input.Text == _G.Key then
-            KeyGui:Destroy()
-            CrearMenuTabs()
-        else
-            Input.Text = ""
-            Input.PlaceholderText = "WRONG KEY ❌"
-            task.wait(1)
-            Input.PlaceholderText = "Paste Key here..."
-        end
+        if Input.Text == _G.Key then KeyGui:Destroy() CrearMenuTabs() end
     end)
 end
 
