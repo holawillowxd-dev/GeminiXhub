@@ -1,7 +1,6 @@
--- [[ GeminiXhub v9.0 - COMMUNITY GOALS UPDATE ]]
+-- [[ GeminiXhub v10.5 - NOT VISUAL (WIP) ]]
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 
@@ -16,7 +15,7 @@ end
 
 local function CrearMenuTabs()
     local MainGui = Instance.new("ScreenGui", CoreGui)
-    MainGui.Name = "GeminiX_Community"
+    MainGui.Name = "GeminiX_WIP"
 
     local OpenBtn = Instance.new("TextButton", MainGui)
     OpenBtn.Size = UDim2.new(0, 50, 0, 50)
@@ -29,28 +28,28 @@ local function CrearMenuTabs()
     EstiloVoid(OpenBtn, 25)
 
     local MainFrame = Instance.new("Frame", MainGui)
-    MainFrame.Size = UDim2.new(0, 450, 0, 300)
-    MainFrame.Position = UDim2.new(0.5, -225, 0.5, -150)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-    EstiloVoid(MainFrame, 10)
+    MainFrame.Size = UDim2.new(0, 480, 0, 320)
+    MainFrame.Position = UDim2.new(0.5, -240, 0.5, -160)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    EstiloVoid(MainFrame, 12)
     Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(0, 170, 255)
 
     local Sidebar = Instance.new("Frame", MainFrame)
-    Sidebar.Size = UDim2.new(0, 120, 1, 0)
-    Sidebar.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
-    EstiloVoid(Sidebar, 10)
+    Sidebar.Size = UDim2.new(0, 130, 1, 0)
+    Sidebar.BackgroundColor3 = Color3.fromRGB(7, 7, 7)
+    EstiloVoid(Sidebar, 12)
 
     local Title = Instance.new("TextLabel", Sidebar)
     Title.Size = UDim2.new(1, 0, 0, 50)
-    Title.Text = "GEMINIX"
+    Title.Text = "GEMINIX V10.5"
     Title.TextColor3 = Color3.fromRGB(0, 170, 255)
     Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 18
+    Title.TextSize = 16
     Title.BackgroundTransparency = 1
 
     local Pages = Instance.new("Frame", MainFrame)
-    Pages.Size = UDim2.new(1, -130, 1, -10)
-    Pages.Position = UDim2.new(0, 125, 0, 5)
+    Pages.Size = UDim2.new(1, -145, 1, -10)
+    Pages.Position = UDim2.new(0, 135, 0, 5)
     Pages.BackgroundTransparency = 1
 
     local function CrearPagina(nombre)
@@ -59,15 +58,15 @@ local function CrearMenuTabs()
         P.Size = UDim2.new(1, 0, 1, 0)
         P.BackgroundTransparency = 1
         P.Visible = false
-        P.CanvasSize = UDim2.new(0, 0, 1.2, 0)
+        P.CanvasSize = UDim2.new(0, 0, 1.5, 0)
         P.ScrollBarThickness = 0
         return P
     end
 
     local PagMain = CrearPagina("Main")
-    local PagCombat = CrearPagina("Combat")
+    local PagNotVisual = CrearPagina("Not Visual")
     local PagVisuals = CrearPagina("Visuals")
-    local PagInfo = CrearPagina("Info") -- Antes Other
+    local PagInfo = CrearPagina("Info")
 
     local function MostrarPagina(nombre)
         for _, p in pairs(Pages:GetChildren()) do p.Visible = false end
@@ -83,40 +82,61 @@ local function CrearMenuTabs()
         B.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
         B.TextColor3 = Color3.fromRGB(255, 255, 255)
         B.Font = Enum.Font.Gotham
-        EstiloVoid(B, 5)
+        B.TextSize = 12
+        EstiloVoid(B, 6)
         B.MouseButton1Click:Connect(function() MostrarPagina(texto) end)
     end
 
     BotonTab("Main", 60)
-    BotonTab("Combat", 100)
+    BotonTab("Not Visual", 100)
     BotonTab("Visuals", 140)
     BotonTab("Info", 180)
 
-    -- CONTENIDO PAGINAS (SISTEMA TOGGLE)
     local function CrearToggle(txt, pag, y, callback)
         local T = Instance.new("TextButton", pag)
         T.Size = UDim2.new(0.95, 0, 0, 40)
         T.Position = UDim2.new(0.025, 0, 0, y)
         T.Text = txt .. ": OFF"
         T.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        T.TextColor3 = Color3.fromRGB(200, 200, 200)
+        T.TextColor3 = Color3.fromRGB(220, 220, 220)
+        T.Font = Enum.Font.Gotham
         EstiloVoid(T, 6)
         local act = false
         T.MouseButton1Click:Connect(function()
             act = not act
             T.Text = txt .. (act and ": ON" or ": OFF")
-            T.BackgroundColor3 = act and Color3.fromRGB(0, 150, 100) or Color3.fromRGB(25, 25, 25)
+            T.BackgroundColor3 = act and Color3.fromRGB(0, 100, 200) or Color3.fromRGB(25, 25, 25)
             callback(act)
         end)
     end
 
-    CrearToggle("Speed Hack", PagMain, 10, function(s) LocalPlayer.Character.Humanoid.WalkSpeed = s and 100 or 16 end)
-    CrearToggle("Super Jump", PagMain, 60, function(s) LocalPlayer.Character.Humanoid.JumpPower = s and 150 or 50 end)
-    CrearToggle("Inf Jump", PagMain, 110, function(s) States.InfJump = s end)
+    -- PESTAÑA MAIN
+    CrearToggle("Reset Character", PagMain, 10, function() LocalPlayer.Character:BreakJoints() end)
+
+    -- PESTAÑA NOT VISUAL (CON WIP)
+    local WipTitle = Instance.new("TextLabel", PagNotVisual)
+    WipTitle.Size = UDim2.new(1, 0, 0, 30)
+    WipTitle.Position = UDim2.new(0, 0, 0, 0)
+    WipTitle.Text = "[ WIP - SECCIÓN EN DESARROLLO ]"
+    WipTitle.TextColor3 = Color3.fromRGB(255, 100, 0)
+    WipTitle.Font = Enum.Font.GothamBold
+    WipTitle.BackgroundTransparency = 1
+    WipTitle.TextSize = 12
+
+    CrearToggle("Speed Flash", PagNotVisual, 40, function(s) LocalPlayer.Character.Humanoid.WalkSpeed = s and 100 or 16 end)
+    CrearToggle("Super Jump", PagNotVisual, 90, function(s) LocalPlayer.Character.Humanoid.JumpPower = s and 150 or 50 end)
+    CrearToggle("Infinite Jump", PagNotVisual, 140, function(s) States.InfJump = s end)
     
-    CrearToggle("Reset Char", PagCombat, 10, function() LocalPlayer.Character:BreakJoints() end)
-    
-    CrearToggle("ESP Players", PagVisuals, 10, function(s)
+    local MoreComing = Instance.new("TextLabel", PagNotVisual)
+    MoreComing.Size = UDim2.new(1, 0, 0, 40)
+    MoreComing.Position = UDim2.new(0, 0, 0, 190)
+    MoreComing.Text = "Próximamente: Fly, Noclip, GodMode..."
+    MoreComing.TextColor3 = Color3.fromRGB(100, 100, 100)
+    MoreComing.Font = Enum.Font.GothamItalic
+    MoreComing.BackgroundTransparency = 1
+
+    -- PESTAÑA VISUALS
+    CrearToggle("ESP Wallhack", PagVisuals, 10, function(s)
         States.ESP = s
         if s then
             for _, v in pairs(Players:GetPlayers()) do
@@ -133,92 +153,15 @@ local function CrearMenuTabs()
         end
     end)
 
-    -- SECCIÓN INFO (META DE LIKES)
+    -- PESTAÑA INFO
     local GoalLabel = Instance.new("TextLabel", PagInfo)
-    GoalLabel.Size = UDim2.new(0.9, 0, 0, 50)
+    GoalLabel.Size = UDim2.new(0.9, 0, 0, 40)
     GoalLabel.Position = UDim2.new(0.05, 0, 0, 10)
-    GoalLabel.Text = "GOAL: 10,000 LIKES FOR NEXT UPDATE"
-    GoalLabel.TextColor3 = Color3.fromRGB(255, 200, 0) -- Dorado/Amarillo
+    GoalLabel.Text = "GOAL: 10,000 LIKES FOR V11.0"
+    GoalLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
     GoalLabel.Font = Enum.Font.GothamBold
     GoalLabel.BackgroundTransparency = 1
-    GoalLabel.TextWrapped = true
 
     local LikeBtn = Instance.new("TextButton", PagInfo)
-    LikeBtn.Size = UDim2.new(0.6, 0, 0, 45)
-    LikeBtn.Position = UDim2.new(0.2, 0, 0, 70)
-    LikeBtn.Text = "👍 DAR LIKE"
-    LikeBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-    LikeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    LikeBtn.Font = Enum.Font.GothamBold
-    EstiloVoid(LikeBtn, 8)
-
-    local liked = false
-    LikeBtn.MouseButton1Click:Connect(function()
-        if not liked then
-            liked = true
-            LikeBtn.Text = "GRACIAS! ❤️"
-            LikeBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 100)
-            print("Like registrado localmente")
-        end
-    end)
-
-    local Credits = Instance.new("TextLabel", PagInfo)
-    Credits.Size = UDim2.new(1, 0, 0, 60)
-    Credits.Position = UDim2.new(0, 0, 0, 130)
-    Credits.Text = "Developed by GeminiX Team\nVisits: 10,000+\nStatus: Safe"
-    Credits.TextColor3 = Color3.fromRGB(150, 150, 150)
-    Credits.BackgroundTransparency = 1
-    Credits.Font = Enum.Font.Gotham
-
-    -- MINIMIZAR
-    local Close = Instance.new("TextButton", Sidebar)
-    Close.Size = UDim2.new(0.9, 0, 0, 30)
-    Close.Position = UDim2.new(0.05, 0, 1, -40)
-    Close.Text = "Minimizar"
-    Close.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    EstiloVoid(Close, 5)
-    Close.MouseButton1Click:Connect(function()
-        MainFrame.Visible = false
-        OpenBtn.Visible = true
-    end)
-
-    OpenBtn.MouseButton1Click:Connect(function()
-        MainFrame.Visible = true
-        OpenBtn.Visible = false
-    end)
-end
-
--- KEY SYSTEM
-local function StartKeySystem()
-    local KeyGui = Instance.new("ScreenGui", CoreGui)
-    local Main = Instance.new("Frame", KeyGui)
-    Main.Size = UDim2.new(0, 300, 0, 160)
-    Main.Position = UDim2.new(0.5, -150, 0.5, -80)
-    Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    EstiloVoid(Main, 10)
-    Instance.new("UIStroke", Main).Color = Color3.fromRGB(0, 170, 255)
-
-    local Input = Instance.new("TextBox", Main)
-    Input.Size = UDim2.new(0.8, 0, 0, 40)
-    Input.Position = UDim2.new(0.1, 0, 0.2, 0)
-    Input.PlaceholderText = "Key..."
-    Input.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    Input.TextColor3 = Color3.fromRGB(255, 255, 255)
-    EstiloVoid(Input, 5)
-
-    local Enter = Instance.new("TextButton", Main)
-    Enter.Size = UDim2.new(0.8, 0, 0, 40)
-    Enter.Position = UDim2.new(0.1, 0, 0.6, 0)
-    Enter.Text = "Login"
-    Enter.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-    EstiloVoid(Enter, 5)
-    Enter.MouseButton1Click:Connect(function()
-        if Input.Text == _G.Key then KeyGui:Destroy() CrearMenuTabs() end
-    end)
-end
-
-UserInputService.JumpRequest:Connect(function()
-    if States.InfJump then LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end
-end)
-
-StartKeySystem()
+    LikeBtn.Size = UDim2.new(0.7, 0, 0, 4
+        
