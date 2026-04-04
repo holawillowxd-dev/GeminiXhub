@@ -1,4 +1,4 @@
--- [[ GeminiXhub v5.0 - VOIDWARE + ESP + INF JUMP ]]
+-- [[ GeminiXhub v6.0 - PROFESSIONAL TOGGLES ]]
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
@@ -6,6 +6,14 @@ local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 
 _G.Key = "GXM-2026-TOP1"
+
+-- Variables de Estado
+local States = {
+    Speed = false,
+    Jump = false,
+    ESP = false,
+    InfJump = false
+}
 
 local function EstiloVoid(instancia)
     local Corner = Instance.new("UICorner")
@@ -15,7 +23,7 @@ end
 
 local function CrearMenuVoid()
     local MainGui = Instance.new("ScreenGui")
-    MainGui.Name = "GeminiX_Voidware_V5"
+    MainGui.Name = "GeminiX_Voidware_V6"
     MainGui.Parent = CoreGui
     MainGui.ResetOnSpawn = false
 
@@ -31,90 +39,116 @@ local function CrearMenuVoid()
     EstiloVoid(OpenBtn)
 
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 240, 0, 380) -- Más alto para las nuevas opciones
+    Frame.Size = UDim2.new(0, 240, 0, 380)
     Frame.Position = UDim2.new(0.5, -120, 0.5, -190)
     Frame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     Frame.Parent = MainGui
     EstiloVoid(Frame)
-    
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = Color3.fromRGB(0, 170, 255)
-    Stroke.Thickness = 2
-    Stroke.Parent = Frame
+    Instance.new("UIStroke", Frame).Color = Color3.fromRGB(0, 170, 255)
 
     local Title = Instance.new("TextLabel")
     Title.Size = UDim2.new(1, 0, 0, 45)
-    Title.Text = "VOIDWARE | V5"
+    Title.Text = "GEMINIXHUB | V6 PRO"
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.BackgroundTransparency = 1
     Title.Font = Enum.Font.GothamBold
     Title.Parent = Frame
 
-    local function CrearBoton(texto, pos, func)
+    local function CrearToggle(texto, pos, callback)
         local Btn = Instance.new("TextButton")
         Btn.Size = UDim2.new(0, 210, 0, 35)
         Btn.Position = pos
-        Btn.Text = texto
-        Btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-        Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        Btn.Text = texto .. ": OFF"
+        Btn.BackgroundColor3 = Color3.fromRGB(40, 20, 20) -- Rojo oscuro inicial
+        Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         Btn.Font = Enum.Font.Gotham
         Btn.Parent = Frame
         EstiloVoid(Btn)
-        Btn.MouseButton1Click:Connect(func)
+
+        local active = false
+        Btn.MouseButton1Click:Connect(function()
+            active = not active
+            if active then
+                Btn.BackgroundColor3 = Color3.fromRGB(20, 40, 20) -- Verde oscuro
+                Btn.Text = texto .. ": ON"
+            else
+                Btn.BackgroundColor3 = Color3.fromRGB(40, 20, 20)
+                Btn.Text = texto .. ": OFF"
+            end
+            callback(active)
+        end)
     end
 
-    -- BOTONES EXISTENTES
-    CrearBoton("VELOCIDAD FLASH", UDim2.new(0.5, -105, 0, 50), function()
-        LocalPlayer.Character.Humanoid.WalkSpeed = 100
+    -- TOGGLE VELOCIDAD
+    CrearToggle("VELOCIDAD", UDim2.new(0.5, -105, 0, 55), function(state)
+        States.Speed = state
+        if state then
+            LocalPlayer.Character.Humanoid.WalkSpeed = 100
+        else
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16
+        end
     end)
 
-    CrearBoton("SUPER SALTO", UDim2.new(0.5, -105, 0, 95), function()
-        LocalPlayer.Character.Humanoid.UseJumpPower = true
-        LocalPlayer.Character.Humanoid.JumpPower = 150
+    -- TOGGLE SALTO
+    CrearToggle("SUPER SALTO", UDim2.new(0.5, -105, 0, 100), function(state)
+        States.Jump = state
+        if state then
+            LocalPlayer.Character.Humanoid.UseJumpPower = true
+            LocalPlayer.Character.Humanoid.JumpPower = 150
+        else
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+        end
     end)
 
-    -- NUEVO: ESP (VER GENTE)
-    CrearBoton("ACTIVAR ESP (VER GENTE)", UDim2.new(0.5, -105, 0, 140), function()
-        for _, v in pairs(Players:GetPlayers()) do
-            if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                local Highlight = Instance.new("Highlight")
-                Highlight.Parent = v.Character
-                Highlight.FillColor = Color3.fromRGB(0, 170, 255)
-                Highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    -- TOGGLE ESP (MEJORADO)
+    CrearToggle("ESP WALLHACK", UDim2.new(0.5, -105, 0, 145), function(state)
+        States.ESP = state
+        if state then
+            for _, v in pairs(Players:GetPlayers()) do
+                if v ~= LocalPlayer and v.Character then
+                    local h = Instance.new("Highlight")
+                    h.Name = "GeminiESP"
+                    h.FillColor = Color3.fromRGB(0, 170, 255)
+                    h.Parent = v.Character
+                end
+            end
+        else
+            for _, v in pairs(Players:GetPlayers()) do
+                if v.Character and v.Character:FindFirstChild("GeminiESP") then
+                    v.Character.GeminiESP:Destroy()
+                end
             end
         end
     end)
 
-    -- NUEVO: SALTO INFINITO
-    local InfJumpEnabled = false
-    CrearBoton("SALTO INFINITO", UDim2.new(0.5, -105, 0, 185), function()
-        InfJumpEnabled = not InfJumpEnabled
-        local b = Frame:FindFirstChild("InfJumpStatus") or Instance.new("TextLabel")
-        b.Name = "InfJumpStatus"
-        b.Size = UDim2.new(0, 210, 0, 20)
-        b.Position = UDim2.new(0.5, -105, 0, 225)
-        b.BackgroundTransparency = 1
-        b.TextColor3 = InfJumpEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-        b.Text = InfJumpEnabled and "INFINITE JUMP: ACTIVADO" or "INFINITE JUMP: DESACTIVADO"
-        b.Parent = Frame
+    -- TOGGLE SALTO INFINITO
+    CrearToggle("INF JUMP", UDim2.new(0.5, -105, 0, 190), function(state)
+        States.InfJump = state
     end)
 
     UserInputService.JumpRequest:Connect(function()
-        if InfJumpEnabled then
+        if States.InfJump then
             LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
         end
     end)
 
-    CrearBoton("RESET CHARACTER", UDim2.new(0.5, -105, 0, 260), function()
-        LocalPlayer.Character:BreakJoints()
-    end)
+    -- RESET Y MINIMIZAR
+    local ResetBtn = Instance.new("TextButton")
+    ResetBtn.Size = UDim2.new(0, 210, 0, 35)
+    ResetBtn.Position = UDim2.new(0.5, -105, 0, 250)
+    ResetBtn.Text = "RESETEAR PERSONAJE"
+    ResetBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    ResetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ResetBtn.Parent = Frame
+    EstiloVoid(ResetBtn)
+    ResetBtn.MouseButton1Click:Connect(function() LocalPlayer.Character:BreakJoints() end)
 
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Size = UDim2.new(0, 210, 0, 35)
     CloseBtn.Position = UDim2.new(0.5, -105, 0, 320)
     CloseBtn.Text = "MINIMIZAR"
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 10, 10)
-    CloseBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseBtn.Parent = Frame
     EstiloVoid(CloseBtn)
     
@@ -129,7 +163,7 @@ local function CrearMenuVoid()
     end)
 end
 
--- SISTEMA DE KEY (MISMO DE ANTES)
+-- SISTEMA DE KEY (MISMO)
 local function StartKeySystem()
     local KeyGui = Instance.new("ScreenGui")
     KeyGui.Parent = CoreGui
@@ -144,7 +178,7 @@ local function StartKeySystem()
     local GetKey = Instance.new("TextButton")
     GetKey.Size = UDim2.new(0, 280, 0, 35)
     GetKey.Position = UDim2.new(0.5, -140, 0, 30)
-    GetKey.Text = "COPIAR KEY (VOID)"
+    GetKey.Text = "COPIAR KEY"
     GetKey.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     GetKey.TextColor3 = Color3.fromRGB(0, 170, 255)
     GetKey.Parent = Main
@@ -153,7 +187,7 @@ local function StartKeySystem()
         setclipboard(_G.Key)
         GetKey.Text = "COPIADA!"
         task.wait(1)
-        GetKey.Text = "COPIAR KEY (VOID)"
+        GetKey.Text = "COPIAR KEY"
     end)
 
     local Input = Instance.new("TextBox")
