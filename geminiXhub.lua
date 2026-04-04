@@ -1,218 +1,224 @@
--- [[ GeminiXhub v6.0 - PROFESSIONAL TOGGLES ]]
+-- [[ GeminiXhub v9.0 - COMMUNITY GOALS UPDATE ]]
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
-local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 
 _G.Key = "GXM-2026-TOP1"
+local States = { Speed = false, Jump = false, ESP = false, InfJump = false }
 
--- Variables de Estado
-local States = {
-    Speed = false,
-    Jump = false,
-    ESP = false,
-    InfJump = false
-}
-
-local function EstiloVoid(instancia)
+local function EstiloVoid(instancia, radio)
     local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 8)
+    Corner.CornerRadius = UDim.new(0, radio or 8)
     Corner.Parent = instancia
 end
 
-local function CrearMenuVoid()
-    local MainGui = Instance.new("ScreenGui")
-    MainGui.Name = "GeminiX_Voidware_V6"
-    MainGui.Parent = CoreGui
-    MainGui.ResetOnSpawn = false
+local function CrearMenuTabs()
+    local MainGui = Instance.new("ScreenGui", CoreGui)
+    MainGui.Name = "GeminiX_Community"
 
-    local OpenBtn = Instance.new("TextButton")
-    OpenBtn.Size = UDim2.new(0, 45, 0, 45)
-    OpenBtn.Position = UDim2.new(0, 15, 0.5, 0)
-    OpenBtn.Text = "V"
+    local OpenBtn = Instance.new("TextButton", MainGui)
+    OpenBtn.Size = UDim2.new(0, 50, 0, 50)
+    OpenBtn.Position = UDim2.new(0, 10, 0.5, 0)
+    OpenBtn.Text = "G"
     OpenBtn.Visible = false
     OpenBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
     OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     OpenBtn.Font = Enum.Font.GothamBold
-    OpenBtn.Parent = MainGui
-    EstiloVoid(OpenBtn)
+    EstiloVoid(OpenBtn, 25)
 
-    local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 240, 0, 380)
-    Frame.Position = UDim2.new(0.5, -120, 0.5, -190)
-    Frame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-    Frame.Parent = MainGui
-    EstiloVoid(Frame)
-    Instance.new("UIStroke", Frame).Color = Color3.fromRGB(0, 170, 255)
+    local MainFrame = Instance.new("Frame", MainGui)
+    MainFrame.Size = UDim2.new(0, 450, 0, 300)
+    MainFrame.Position = UDim2.new(0.5, -225, 0.5, -150)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+    EstiloVoid(MainFrame, 10)
+    Instance.new("UIStroke", MainFrame).Color = Color3.fromRGB(0, 170, 255)
 
-    local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, 0, 0, 45)
-    Title.Text = "GEMINIXHUB | V6 PRO"
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.BackgroundTransparency = 1
+    local Sidebar = Instance.new("Frame", MainFrame)
+    Sidebar.Size = UDim2.new(0, 120, 1, 0)
+    Sidebar.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
+    EstiloVoid(Sidebar, 10)
+
+    local Title = Instance.new("TextLabel", Sidebar)
+    Title.Size = UDim2.new(1, 0, 0, 50)
+    Title.Text = "GEMINIX"
+    Title.TextColor3 = Color3.fromRGB(0, 170, 255)
     Title.Font = Enum.Font.GothamBold
-    Title.Parent = Frame
+    Title.TextSize = 18
+    Title.BackgroundTransparency = 1
 
-    local function CrearToggle(texto, pos, callback)
-        local Btn = Instance.new("TextButton")
-        Btn.Size = UDim2.new(0, 210, 0, 35)
-        Btn.Position = pos
-        Btn.Text = texto .. ": OFF"
-        Btn.BackgroundColor3 = Color3.fromRGB(40, 20, 20) -- Rojo oscuro inicial
-        Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Btn.Font = Enum.Font.Gotham
-        Btn.Parent = Frame
-        EstiloVoid(Btn)
+    local Pages = Instance.new("Frame", MainFrame)
+    Pages.Size = UDim2.new(1, -130, 1, -10)
+    Pages.Position = UDim2.new(0, 125, 0, 5)
+    Pages.BackgroundTransparency = 1
 
-        local active = false
-        Btn.MouseButton1Click:Connect(function()
-            active = not active
-            if active then
-                Btn.BackgroundColor3 = Color3.fromRGB(20, 40, 20) -- Verde oscuro
-                Btn.Text = texto .. ": ON"
-            else
-                Btn.BackgroundColor3 = Color3.fromRGB(40, 20, 20)
-                Btn.Text = texto .. ": OFF"
-            end
-            callback(active)
+    local function CrearPagina(nombre)
+        local P = Instance.new("ScrollingFrame", Pages)
+        P.Name = nombre
+        P.Size = UDim2.new(1, 0, 1, 0)
+        P.BackgroundTransparency = 1
+        P.Visible = false
+        P.CanvasSize = UDim2.new(0, 0, 1.2, 0)
+        P.ScrollBarThickness = 0
+        return P
+    end
+
+    local PagMain = CrearPagina("Main")
+    local PagCombat = CrearPagina("Combat")
+    local PagVisuals = CrearPagina("Visuals")
+    local PagInfo = CrearPagina("Info") -- Antes Other
+
+    local function MostrarPagina(nombre)
+        for _, p in pairs(Pages:GetChildren()) do p.Visible = false end
+        Pages[nombre].Visible = true
+    end
+    MostrarPagina("Main")
+
+    local function BotonTab(texto, yPos)
+        local B = Instance.new("TextButton", Sidebar)
+        B.Size = UDim2.new(0.9, 0, 0, 35)
+        B.Position = UDim2.new(0.05, 0, 0, yPos)
+        B.Text = texto
+        B.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        B.TextColor3 = Color3.fromRGB(255, 255, 255)
+        B.Font = Enum.Font.Gotham
+        EstiloVoid(B, 5)
+        B.MouseButton1Click:Connect(function() MostrarPagina(texto) end)
+    end
+
+    BotonTab("Main", 60)
+    BotonTab("Combat", 100)
+    BotonTab("Visuals", 140)
+    BotonTab("Info", 180)
+
+    -- CONTENIDO PAGINAS (SISTEMA TOGGLE)
+    local function CrearToggle(txt, pag, y, callback)
+        local T = Instance.new("TextButton", pag)
+        T.Size = UDim2.new(0.95, 0, 0, 40)
+        T.Position = UDim2.new(0.025, 0, 0, y)
+        T.Text = txt .. ": OFF"
+        T.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        T.TextColor3 = Color3.fromRGB(200, 200, 200)
+        EstiloVoid(T, 6)
+        local act = false
+        T.MouseButton1Click:Connect(function()
+            act = not act
+            T.Text = txt .. (act and ": ON" or ": OFF")
+            T.BackgroundColor3 = act and Color3.fromRGB(0, 150, 100) or Color3.fromRGB(25, 25, 25)
+            callback(act)
         end)
     end
 
-    -- TOGGLE VELOCIDAD
-    CrearToggle("VELOCIDAD", UDim2.new(0.5, -105, 0, 55), function(state)
-        States.Speed = state
-        if state then
-            LocalPlayer.Character.Humanoid.WalkSpeed = 100
-        else
-            LocalPlayer.Character.Humanoid.WalkSpeed = 16
-        end
-    end)
-
-    -- TOGGLE SALTO
-    CrearToggle("SUPER SALTO", UDim2.new(0.5, -105, 0, 100), function(state)
-        States.Jump = state
-        if state then
-            LocalPlayer.Character.Humanoid.UseJumpPower = true
-            LocalPlayer.Character.Humanoid.JumpPower = 150
-        else
-            LocalPlayer.Character.Humanoid.JumpPower = 50
-        end
-    end)
-
-    -- TOGGLE ESP (MEJORADO)
-    CrearToggle("ESP WALLHACK", UDim2.new(0.5, -105, 0, 145), function(state)
-        States.ESP = state
-        if state then
+    CrearToggle("Speed Hack", PagMain, 10, function(s) LocalPlayer.Character.Humanoid.WalkSpeed = s and 100 or 16 end)
+    CrearToggle("Super Jump", PagMain, 60, function(s) LocalPlayer.Character.Humanoid.JumpPower = s and 150 or 50 end)
+    CrearToggle("Inf Jump", PagMain, 110, function(s) States.InfJump = s end)
+    
+    CrearToggle("Reset Char", PagCombat, 10, function() LocalPlayer.Character:BreakJoints() end)
+    
+    CrearToggle("ESP Players", PagVisuals, 10, function(s)
+        States.ESP = s
+        if s then
             for _, v in pairs(Players:GetPlayers()) do
                 if v ~= LocalPlayer and v.Character then
-                    local h = Instance.new("Highlight")
+                    local h = Instance.new("Highlight", v.Character)
                     h.Name = "GeminiESP"
                     h.FillColor = Color3.fromRGB(0, 170, 255)
-                    h.Parent = v.Character
                 end
             end
         else
             for _, v in pairs(Players:GetPlayers()) do
-                if v.Character and v.Character:FindFirstChild("GeminiESP") then
-                    v.Character.GeminiESP:Destroy()
-                end
+                if v.Character and v.Character:FindFirstChild("GeminiESP") then v.Character.GeminiESP:Destroy() end
             end
         end
     end)
 
-    -- TOGGLE SALTO INFINITO
-    CrearToggle("INF JUMP", UDim2.new(0.5, -105, 0, 190), function(state)
-        States.InfJump = state
-    end)
+    -- SECCIÓN INFO (META DE LIKES)
+    local GoalLabel = Instance.new("TextLabel", PagInfo)
+    GoalLabel.Size = UDim2.new(0.9, 0, 0, 50)
+    GoalLabel.Position = UDim2.new(0.05, 0, 0, 10)
+    GoalLabel.Text = "GOAL: 10,000 LIKES FOR NEXT UPDATE"
+    GoalLabel.TextColor3 = Color3.fromRGB(255, 200, 0) -- Dorado/Amarillo
+    GoalLabel.Font = Enum.Font.GothamBold
+    GoalLabel.BackgroundTransparency = 1
+    GoalLabel.TextWrapped = true
 
-    UserInputService.JumpRequest:Connect(function()
-        if States.InfJump then
-            LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    local LikeBtn = Instance.new("TextButton", PagInfo)
+    LikeBtn.Size = UDim2.new(0.6, 0, 0, 45)
+    LikeBtn.Position = UDim2.new(0.2, 0, 0, 70)
+    LikeBtn.Text = "👍 DAR LIKE"
+    LikeBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+    LikeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    LikeBtn.Font = Enum.Font.GothamBold
+    EstiloVoid(LikeBtn, 8)
+
+    local liked = false
+    LikeBtn.MouseButton1Click:Connect(function()
+        if not liked then
+            liked = true
+            LikeBtn.Text = "GRACIAS! ❤️"
+            LikeBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 100)
+            print("Like registrado localmente")
         end
     end)
 
-    -- RESET Y MINIMIZAR
-    local ResetBtn = Instance.new("TextButton")
-    ResetBtn.Size = UDim2.new(0, 210, 0, 35)
-    ResetBtn.Position = UDim2.new(0.5, -105, 0, 250)
-    ResetBtn.Text = "RESETEAR PERSONAJE"
-    ResetBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    ResetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ResetBtn.Parent = Frame
-    EstiloVoid(ResetBtn)
-    ResetBtn.MouseButton1Click:Connect(function() LocalPlayer.Character:BreakJoints() end)
+    local Credits = Instance.new("TextLabel", PagInfo)
+    Credits.Size = UDim2.new(1, 0, 0, 60)
+    Credits.Position = UDim2.new(0, 0, 0, 130)
+    Credits.Text = "Developed by GeminiX Team\nVisits: 10,000+\nStatus: Safe"
+    Credits.TextColor3 = Color3.fromRGB(150, 150, 150)
+    Credits.BackgroundTransparency = 1
+    Credits.Font = Enum.Font.Gotham
 
-    local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Size = UDim2.new(0, 210, 0, 35)
-    CloseBtn.Position = UDim2.new(0.5, -105, 0, 320)
-    CloseBtn.Text = "MINIMIZAR"
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseBtn.Parent = Frame
-    EstiloVoid(CloseBtn)
-    
-    CloseBtn.MouseButton1Click:Connect(function()
-        Frame.Visible = false
+    -- MINIMIZAR
+    local Close = Instance.new("TextButton", Sidebar)
+    Close.Size = UDim2.new(0.9, 0, 0, 30)
+    Close.Position = UDim2.new(0.05, 0, 1, -40)
+    Close.Text = "Minimizar"
+    Close.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    EstiloVoid(Close, 5)
+    Close.MouseButton1Click:Connect(function()
+        MainFrame.Visible = false
         OpenBtn.Visible = true
     end)
 
     OpenBtn.MouseButton1Click:Connect(function()
-        Frame.Visible = true
+        MainFrame.Visible = true
         OpenBtn.Visible = false
     end)
 end
 
--- SISTEMA DE KEY (MISMO)
+-- KEY SYSTEM
 local function StartKeySystem()
-    local KeyGui = Instance.new("ScreenGui")
-    KeyGui.Parent = CoreGui
-    local Main = Instance.new("Frame")
-    Main.Size = UDim2.new(0, 320, 0, 200)
-    Main.Position = UDim2.new(0.5, -160, 0.5, -100)
-    Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-    Main.Parent = KeyGui
-    EstiloVoid(Main)
+    local KeyGui = Instance.new("ScreenGui", CoreGui)
+    local Main = Instance.new("Frame", KeyGui)
+    Main.Size = UDim2.new(0, 300, 0, 160)
+    Main.Position = UDim2.new(0.5, -150, 0.5, -80)
+    Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    EstiloVoid(Main, 10)
     Instance.new("UIStroke", Main).Color = Color3.fromRGB(0, 170, 255)
 
-    local GetKey = Instance.new("TextButton")
-    GetKey.Size = UDim2.new(0, 280, 0, 35)
-    GetKey.Position = UDim2.new(0.5, -140, 0, 30)
-    GetKey.Text = "COPIAR KEY"
-    GetKey.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    GetKey.TextColor3 = Color3.fromRGB(0, 170, 255)
-    GetKey.Parent = Main
-    EstiloVoid(GetKey)
-    GetKey.MouseButton1Click:Connect(function()
-        setclipboard(_G.Key)
-        GetKey.Text = "COPIADA!"
-        task.wait(1)
-        GetKey.Text = "COPIAR KEY"
-    end)
-
-    local Input = Instance.new("TextBox")
-    Input.Size = UDim2.new(0, 280, 0, 40)
-    Input.Position = UDim2.new(0.5, -140, 0, 80)
-    Input.PlaceholderText = "Escribe la llave..."
-    Input.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    local Input = Instance.new("TextBox", Main)
+    Input.Size = UDim2.new(0.8, 0, 0, 40)
+    Input.Position = UDim2.new(0.1, 0, 0.2, 0)
+    Input.PlaceholderText = "Key..."
+    Input.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     Input.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Input.Parent = Main
-    EstiloVoid(Input)
+    EstiloVoid(Input, 5)
 
-    local Enter = Instance.new("TextButton")
-    Enter.Size = UDim2.new(0, 280, 0, 45)
-    Enter.Position = UDim2.new(0.5, -140, 0, 135)
-    Enter.Text = "AUTENTICAR"
+    local Enter = Instance.new("TextButton", Main)
+    Enter.Size = UDim2.new(0.8, 0, 0, 40)
+    Enter.Position = UDim2.new(0.1, 0, 0.6, 0)
+    Enter.Text = "Login"
     Enter.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-    Enter.Parent = Main
-    EstiloVoid(Enter)
-    
+    EstiloVoid(Enter, 5)
     Enter.MouseButton1Click:Connect(function()
-        if Input.Text == _G.Key then
-            KeyGui:Destroy()
-            CrearMenuVoid()
-        end
+        if Input.Text == _G.Key then KeyGui:Destroy() CrearMenuTabs() end
     end)
 end
+
+UserInputService.JumpRequest:Connect(function()
+    if States.InfJump then LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end
+end)
 
 StartKeySystem()
